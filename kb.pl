@@ -2,7 +2,8 @@ begin :-
 	welcome_message,
 	clear,
 	get_cocktail(Cocktail),
-	write(Cocktail).
+	write(Cocktail);
+	write('It does not look like we have that drink on the menu.').
 
 welcome_message :- 
 	writeln('Welcome to this ES about cocktails!'), 
@@ -16,10 +17,10 @@ exit :-
 	writeln('bye'),
 	halt(0).
 
-:- dynamic(recipe/2).
+:- dynamic(drink_info/2).
 
 clear :-
-	retract(recipe(_,_)),
+	retract(drink_info(_,_)),
 	fail.
 clear.
 
@@ -27,60 +28,136 @@ get_cocktail(Cocktail) :-
 	cocktail(Cocktail),
 	!.
 
-
-
 /* Drinks */
-cocktail(margarita)   :- spirit('tequila').
-cocktail(rum_runner)  :- spirit('rum').
+cocktail(margarita) :- 
+	spirit('tequila'),
+	time_of_day('evening'),
+	citrus('lime').
+
+cocktail(paloma) :- 
+	spirit('tequila'),
+	time_of_day('evening'),
+	citrus('grapefruit').
+
+cocktail(tequila_sunrise) :- 
+	spirit('tequila'),
+	time_of_day('day_time'),
+	pallet('sweet').
+
+cocktail(bloody_maria) :- 
+	spirit('tequila'),
+	time_of_day('day_time'),
+	pallet('savory').
+
+cocktail(bloody_mary) :- 
+	spirit('vodka'), 
+	time_of_day('day_time').
+
+cocktail(lemon_drop) :- 
+	spirit('vodka'), 
+	time_of_day('evening'),
+	flavor_vodka('lemon').
+
+cocktail(moscow_mule) :- 
+	spirit('vodka'),
+	time_of_day('evening'),
+	flavor_vodka('ginger').
+
+cocktail(vodka_martini) :- 
+	spirit('vodka'),
+	time_of_day('evening'),
+	flavor_vodka('i_just_want_to_look_cool').
+
+cocktail(pina_colada) :-
+	spirit('rum'),
+	flavor_rum('coconut').
+
+cocktail(dark_and_stormy) :-
+	spirit('rum'),
+	flavor_rum('ginger').
+
+cocktail(mai_tai) :- 
+	spirit('rum'),
+	flavor_rum('lime').
+
+cocktail(strawberry_daiquiri) :-
+	spirit('rum'),
+	flavor_rum('strawberry').
+
 cocktail(martini)     :- spirit('gin').
-cocktail(appletini)   :- spirit('vodka').
 cocktail(old_fashion) :- spirit('whiskey').
 
 
-% cocktail(mai_tai) :-
-%	spirit('rum'), query('orange')
-%cocktail(bay_breeze) :-
-%	spirit('rum'), query('coconut')
-%cocktail(south_beach).
-%	spirit('vodka').
-%cocktail(cosmopolitan) :-
-%	spirit('vodka').
-%cocktail(lemon_drop) :-
-%	spirit('vodka'), query('citrus').
-%cocktail(kamikaze) :-
-%	spirit('vodka').
-%cocktail(pina_colada) :-
-%	spirit('rum').
-%cocktail(sex_on_the_beach) :-
-%	spirit('vodka').
-%cocktail(hurricane) :-
-%	spirit('vodka').
-%cocktail(strawberry_daiquiri) :-
-%	spirit('rum').
 
 
 spirit(Spirit) :-
-	recipe(spirit, Spirit).
+	drink_info(spirit, Spirit).
 spirit(Spirit) :-
-	\+ recipe(spirit, _),
+	\+ drink_info(spirit, _),
 	query(spirit, Spirit, [tequila, vodka, rum, whiskey, gin]).
-	
 
-query(Step, Spirit, []).
-query(Step, Spirit, [C | E]) :-
+time_of_day(Time) :-
+	drink_info(time_of_day, Time).
+time_of_day(Time) :-
+	\+ drink_info(time_of_day, _),
+	query(time_of_day, Time, [day_time, evening]).
+
+
+citrus(Citrus) :-
+	drink_info(citrus, Citrus).
+citrus(Citrus) :-
+	\+ drink_info(citrus, _),
+	query(citrus, Citrus, [lime, grapefruit]).	
+
+pallet(Pallet) :-
+	drink_info(pallet, Pallet).
+pallet(Pallet) :-
+	\+ drink_info(pallet, _),
+	query(pallet, Pallet, [savory, sweet]).	
+
+flavor_vodka(Flavor) :-
+	drink_info(flavor, Flavor).
+flavor_vodka(Flavor) :-
+	\+ drink_info(flavor, _),
+	query(flavor, Flavor, [lemon, ginger, i_just_want_to_look_cool]).
+
+flavor_rum(Flavor) :-
+	drink_info(flavor, Flavor).
+flavor_rum(Flavor) :-
+	\+ drink_info(flavor, _),
+	query(flavor, Flavor, [coconut, lime, ginger, strawberry]).
+
+query(Step, Answer, []),
+	fail.
+query(Step, Answer, [C | E]) :-
 	question(Step),
 	writeln(C),
 	read(yes) -> 
-		assert(recipe(spirit, C)),
-		C = Spirit,
+		assert(drink_info(Step, C)),
+		C = Answer,
 		query(Step, C, []); 
-	  	query(Step, Spirit, E).
+	  	query(Step, Answer, E).
 
 question(spirit) :-
 	nl,
 	writeln('What type of liquor do you want? ').
 
+question(time_of_day) :-
+	nl,
+	writeln('What time of day would you like to enjoy this dirnk?').
+
 question(citrus) :-
-	n1,
+	nl,
 	writeln('What type of citrus would you like').
 
+question(pallet) :-
+	nl,
+	writeln('Would you like savory or sweet?').
+
+question(flavor) :-
+	nl,
+	writeln('What flavor would you like your drink?').
+
+question(location) :-
+	nl,
+	writeln('Where would you like to enjoy your drink?').
