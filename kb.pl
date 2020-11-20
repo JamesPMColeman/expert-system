@@ -1,9 +1,10 @@
 begin :-
 	welcome_message,
 	clear,
-	get_cocktail(Cocktail),
-	write(Cocktail);
-	write('It does not look like we have that drink on the menu.').
+	get_cocktail(Cocktail) -> (
+		format('I think you will enjoy a ~w as your cocktail', [Cocktail])
+	).
+	
 
 welcome_message :- 
 	writeln('Welcome to this ES about cocktails!'), 
@@ -12,6 +13,9 @@ welcome_message :-
 	writeln('Ready? '),
 	read(yes);
 	exit.
+
+test :-
+	writeln('HERE').
 
 exit :-
 	writeln('bye'),
@@ -26,7 +30,7 @@ clear.
 
 get_cocktail(Cocktail) :-
 	cocktail(Cocktail),
-	!.
+	cocktail(Cocktail).
 
 /* Drinks */
 cocktail(margarita) :- 
@@ -84,24 +88,53 @@ cocktail(strawberry_daiquiri) :-
 	spirit('rum'),
 	flavor_rum('strawberry').
 
-cocktail(martini)     :- spirit('gin').
-cocktail(old_fashion) :- spirit('whiskey').
+cocktail(gin_martini) :- 
+	spirit('gin').
 
+cocktail(gin_and_tonic) :- 
+	spirit('gin').
 
+cocktail(gimlet) :- 
+	spirit('gin').
+
+cocktail(negroni) :- 
+	spirit('gin').
+
+cocktail(old_fashion) :- 
+	spirit('whiskey'),
+	type_of_person('old_soul').
+
+cocktail(whiskey_sour) :- 
+	spirit('whiskey'),
+	type_of_person('ive_got_two_sides').
+
+cocktail(irish_coffee) :- 
+	spirit('whiskey'),
+	type_of_person('moning_person').
+
+cocktail(manhattan) :- 
+	spirit('whiskey'),
+	type_of_person('sophisticated').
+
+cocktail(different) :-
+	nl,
+	writeln('It appears that we do not have that drink on the menu'),
+	writeln('Let\'s try again.'),
+	nl,
+	begin.
 
 
 spirit(Spirit) :-
 	drink_info(spirit, Spirit).
 spirit(Spirit) :-
 	\+ drink_info(spirit, _),
-	query(spirit, Spirit, [tequila, vodka, rum, whiskey, gin]).
+	query(spirit, Spirit, [tequila, vodka, rum, gin, whiskey]).
 
 time_of_day(Time) :-
 	drink_info(time_of_day, Time).
 time_of_day(Time) :-
 	\+ drink_info(time_of_day, _),
 	query(time_of_day, Time, [day_time, evening]).
-
 
 citrus(Citrus) :-
 	drink_info(citrus, Citrus).
@@ -127,37 +160,44 @@ flavor_rum(Flavor) :-
 	\+ drink_info(flavor, _),
 	query(flavor, Flavor, [coconut, lime, ginger, strawberry]).
 
-query(Step, Answer, []),
-	fail.
+type_of_person(Person) :-
+	drink_info(type_of_person, Person).
+type_of_person(Person) :-
+    \+ drink_info(type_of_person, _),
+	query(type_of_person, Person, [old_soul, ive_got_two_sides, morning_person,sophisticated]).
+
+query(Step, Answer, []) :-
+	assert(drink_info(Step, false)).
 query(Step, Answer, [C | E]) :-
 	question(Step),
-	writeln(C),
+	write(C),
+	writeln('?'),
 	read(yes) -> 
 		assert(drink_info(Step, C)),
-		C = Answer,
-		query(Step, C, []); 
+		Answer = C,
+		query(Step, Answer, []); 
 	  	query(Step, Answer, E).
 
 question(spirit) :-
 	nl,
-	writeln('What type of liquor do you want? ').
+	write('What type of liquor do you want: ').
 
 question(time_of_day) :-
 	nl,
-	writeln('What time of day would you like to enjoy this dirnk?').
+	write('What time of day would you like to enjoy this drink: ').
 
 question(citrus) :-
 	nl,
-	writeln('What type of citrus would you like').
+	write('What type of citrus would you like: ').
 
 question(pallet) :-
 	nl,
-	writeln('Would you like savory or sweet?').
+	write('Would you like savory or sweet: ').
 
 question(flavor) :-
 	nl,
-	writeln('What flavor would you like your drink?').
+	write('What flavor would you like your drink: ').
 
-question(location) :-
+question(type_of_person) :-
 	nl,
-	writeln('Where would you like to enjoy your drink?').
+	write('What type of person are you: ').
